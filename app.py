@@ -6,37 +6,45 @@ import gdown
 import os
 
 
-# ---------------- DOWNLOAD FROM GOOGLE DRIVE ----------------
+# ---------------- CACHE + DOWNLOAD ----------------
 
-def download(file_id, output):
+@st.cache_resource
+def load_files():
 
-    if not os.path.exists(output):
+    def download(file_id, output):
 
-        url = f"https://drive.google.com/uc?id={file_id}"
+        if not os.path.exists(output):
 
-        st.write(f"Downloading {output}...")   # helps debug in cloud
+            url = f"https://drive.google.com/uc?id={file_id}"
 
-        gdown.download(url, output, quiet=False, fuzzy=True)
-
-
-# Google Drive files
-download(
-    "1AMSfx-pQATFlJ-2Sm37QuxXByF8uv0Ih",
-    "similarity_movies.pkl"
-)
-
-download(
-    "1yaNKoljmyVCV7-pgaO-ulhWaAbdheOat",
-    "movie_recommendation.pkl"
-)
+            gdown.download(url, output, quiet=False, fuzzy=True)
 
 
-# ---------------- LOAD PICKLE ----------------
+    # similarity file
+    download(
+        "1AMSfx-pQATFlJ-2Sm37QuxXByF8uv0Ih",
+        "similarity_movies.pkl"
+    )
+
+    # movies file
+    download(
+        "1yaNKoljmyVCV7-pgaO-ulhWaAbdheOat",
+        "movie_recommendation.pkl"
+    )
+
+
+    movies = pickle.load(open("movie_recommendation.pkl", "rb"))
+    similarity = pickle.load(open("similarity_movies.pkl", "rb"))
+
+    return movies, similarity
+
+
+movies, similarity = load_files()
+
+
+# ---------------- UI ----------------
 
 st.header("Movie Recommender System")
-
-movies = pickle.load(open("movie_recommendation.pkl", "rb"))
-similarity = pickle.load(open("similarity_movies.pkl", "rb"))
 
 
 if isinstance(movies, dict):
